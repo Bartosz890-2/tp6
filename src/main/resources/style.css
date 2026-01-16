@@ -1,0 +1,45 @@
+.side-panel {
+    -fx-background-color: #3d1905;
+    -fx-padding: 15px;
+}
+
+.header-label {
+
+    -fx-text-fill: #FEFEFE; 
+    -fx-font-weight: bold; 
+    -fx-font-size: 14px;
+}
+
+.log-area, .chat-area, .chat-input {
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-control-inner-background: #fefefe;
+    
+    -fx-background-insets: 0;
+}
+
+.log-area .viewport, .log-area .content, .chat-area .viewport, .chat-area .content{
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+}
+
+.game-button {
+    -fx-background-color: #DEB887; 
+    -fx-text-fill: #3d1905;        
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-background-radius: 15px;   
+    -fx-cursor: hand;
+    -fx-border-color: #8c6b45;     
+    -fx-border-radius: 15px;
+    -fx-padding: 5px 15px;
+}
+
+.button:hover {
+    -fx-background-color: #ffd9a6;
+}
+
+.game-button:pressed {
+    -fx-scale-y: 0.9;
+    -fx-scale-x: 0.9;
+}
