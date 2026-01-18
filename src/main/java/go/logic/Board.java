@@ -1,5 +1,6 @@
 package go.logic;
 
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -14,6 +15,7 @@ public class Board {
      */
     private final int size;
 
+    private Point lastMove = new Point(-1, -1);
     /**
      * Dwuwymiarowa tablica przechowująca kamienie (lub puste pola) na planszy.
      * Pole publiczne finalne dla szybkiego dostępu w logice gry,
@@ -60,6 +62,10 @@ public class Board {
             throw new IllegalArgumentException("Podane pole nie nalezy do planszy!");
         }
         fields[wspX][wspY] = stone;
+
+        if (stone != Stone.EMPTY) {
+            setLastMove(wspX, wspY);
+        }
     }
 
     /**
@@ -140,5 +146,16 @@ public class Board {
                 destinationBoard.fields[i][j] = this.fields[i][j];
             }
         }
+
+        destinationBoard.setLastMove(lastMove.x, lastMove.y);
+    }
+
+    public void setLastMove(int x, int y) {
+        lastMove.x = x;
+        lastMove.y = y;
+    }
+
+    public Point getLastMove() {
+        return lastMove;
     }
 }

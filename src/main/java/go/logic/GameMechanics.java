@@ -80,7 +80,7 @@ public class GameMechanics {
      * @param y współrzędna Y postawionego kamienia.
      * @param color kolor postawionego kamienia.
      */
-    private void CheckCaptures(Board board, int x, int y, Stone color) {
+    public void CheckCaptures(Board board, int x, int y, Stone color) {
         Set<Point> groupMembers = new HashSet<>();
         Set<Point> emptyGroupFields = new HashSet<>();
         Set<Point> processedOpponents = new HashSet<>();
@@ -286,5 +286,13 @@ public class GameMechanics {
      */
     public int getWhiteTerritory() {
         return whiteTerritory;
+    }
+
+    public void subtractFromWhiteCaptures(int score) {
+        whiteCaptures -= score;
+    }
+
+    public void subtractFromBlackCaptures(int score) {
+        blackCaptures -= score;
     }
 }
