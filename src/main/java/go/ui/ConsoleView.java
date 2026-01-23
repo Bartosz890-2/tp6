@@ -134,4 +134,9 @@ public class ConsoleView implements GameView {
     public void setAcceptButtonActive(boolean active) {
         // Brak implementacji w widoku tekstowym
     }
+
+    @Override
+    public int askForGameMode() {
+        return 0;
+    }
 }

@@ -78,4 +78,6 @@ public interface GameView {
      * @param active true, aby przycisk był dostępny; false, aby go ukryć/zablokować.
      */
     void setAcceptButtonActive(boolean active);
+
+    int askForGameMode();
 }

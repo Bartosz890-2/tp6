@@ -73,9 +73,17 @@ public class GameSession implements Runnable{
             DataOutputStream[] outputs = {output1, output2};
             Stone[] colors = {Stone.BLACK, Stone.WHITE};
 
-            output1.writeInt(1); // Wysyłamy ID gracza 1
+            output1.writeInt(1);
             output1.flush();
-            System.out.println("Gra rozpoczęta.");
+
+            output2.writeInt(2);
+            output2.flush();
+
+            output1.writeInt(1);
+            output1.flush();
+
+
+            System.out.println("Gra Multiplayer rozpoczęta.");
 
             //gracze wewnatrz programu sa numerowani 0 i 1 ze wzgledu na tablice
             int currentPlayer = 0;

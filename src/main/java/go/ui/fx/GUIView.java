@@ -1,13 +1,18 @@
 package go.ui.fx;
 
 import java.awt.Point;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import go.logic.Board;
 import go.ui.GameView;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.input.KeyCode;
 
 /**
@@ -236,5 +241,35 @@ public class GUIView implements GameView{
             sidePanel.getAcceptBtn().setVisible(active);
             sidePanel.getAcceptBtn().setManaged(active);
         });
+    }
+
+    @Override
+    public int askForGameMode() {
+        // 1. Tworzymy zadanie dla wątku graficznego
+        FutureTask<Integer> query = new FutureTask<>(() -> {
+            List<String> choices = Arrays.asList("Gra z Botem", "Gra Online (PvP)");
+            ChoiceDialog<String> dialog = new ChoiceDialog<>("Gra z Botem", choices);
+            dialog.setTitle("Wybór trybu gry");
+            dialog.setHeaderText("Konfiguracja");
+            dialog.setContentText("Wybierz tryb:");
+
+            Optional<String> result = dialog.showAndWait();
+
+            if (result.isPresent() && result.get().equals("Gra Online (PvP)")) {
+                return 2;
+            }
+            return 1; // Domyślnie Bot
+        });
+
+        // 2. Wrzucamy zadanie do kolejki JavaFX
+        Platform.runLater(query);
+
+        // 3. Czekamy w wątku klienta na wykonanie zadania przez JavaFX
+        try {
+            return query.get(); // <--- To czeka aż klikniesz w okno
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 1;
+        }
     }
 }

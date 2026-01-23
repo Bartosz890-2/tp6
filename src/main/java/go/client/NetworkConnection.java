@@ -26,6 +26,10 @@ public class NetworkConnection {
     public NetworkConnection() {
     }
 
+    public void sendGameMode(int mode) throws IOException {
+        toServer.writeInt(mode);
+        toServer.flush();
+    }
     /**
      * Nawiązuje połączenie TCP z serwerem gry (localhost) na porcie określonym w Protokole.
      * Inicjalizuje strumienie wejścia i wyjścia.

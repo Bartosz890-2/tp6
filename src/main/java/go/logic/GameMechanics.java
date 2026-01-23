@@ -209,6 +209,8 @@ public class GameMechanics {
      * @param explored tablica odwiedzonych pól.
      */
     private void calculateEmptyFieldPoints(Board board, Point point, boolean[][] explored) {
+        whiteTerritory = 0;
+        blackTerritory = 0;
         Queue<Point> queue = new LinkedList<>();
         queue.add(point);
         int currentTerritorySize = 0;

@@ -42,27 +42,50 @@ public class GoClient {
      * Nawiązuje połączenie z serwerem, ustala tożsamość gracza (kolor)
      * i uruchamia główną pętlę gry.
      */
+    /**
+     * Nawiązuje połączenie z serwerem.
+     * PYTA UŻYTKOWNIKA O TRYB GRY (Bot vs Human),
+     * wysyła wybór do serwera, ustala tożsamość i startuje grę.
+     */
     public void connect(){
         try {
-            gameView.showMessage("Łączenie z serwerem");
-            network.connect(); // nawiązanie połączenia z serwerem
+            // 1. Zapytaj użytkownika o tryb gry PRZED połączeniem
+            // (Musisz dodać tę metodę do interfejsu GameView!)
+            // Zwraca: 1 = Bot, 2 = Multiplayer
+            int selectedMode = gameView.askForGameMode();
+
+            gameView.showMessage("Łączenie z serwerem...");
+            network.connect(); // Fizyczne połączenie socketu
+
+            // 2. Wyślij wybór do serwera (Handshake)
+            // (Musisz dodać tę metodę do NetworkConnection!)
+            network.sendGameMode(selectedMode);
+
+            // 3. Dalej po staremu - odbieramy ID przydzielone przez serwer
             int playerId = network.getPlayerId();
             gameView.showMessage("Połączono jako gracz " + playerId);
+
             if(playerId == Protocol.Player1){
-                gameView.showMessage("Czekanie na drugiego gracza");
-                network.waitForSecondPlayer(); // oczekiwanie na drugiego gracza
-                myColor = Stone.BLACK; // przypisanie koloru czarnego pierwszemu graczowi
-                gameView.showMessage("Drugi gracz dołączył. Rozpoczynam grę");
+                // Jeśli gramy z Botem, to "wait" trwa ułamek sekundy, bo bot jest gotowy od razu
+                gameView.showMessage("Czekanie na przeciwnika...");
+
+                // W trybie BOTnetwork.waitForSecondPlayer() może od razu zwrócić true,
+                // w trybie HUMAN czeka na drugiego człowieka.
+                network.waitForSecondPlayer();
+
+                myColor = Stone.BLACK;
+                gameView.showMessage("Przeciwnik gotowy. Rozpoczynam grę (Jesteś CZARNYM).");
             }
             else{
-                myColor = Stone.WHITE;  // przypisanie koloru białego drugiemu graczowi
-                gameView.showMessage("Rozpoczynam grę");
+                myColor = Stone.WHITE;
+                gameView.showMessage("Dołączyłeś do gry. Rozpoczynam grę (Jesteś BIAŁYM).");
             }
-            // start wątku obsługującego czat
+
             startChatThread();
-            playGame(); //start gry
+            playGame();
         } catch (IOException e) {
-            gameView.showMessage("Błąd połączenia z serwerem");
+            gameView.showMessage("Błąd połączenia z serwerem: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -142,9 +165,16 @@ public class GoClient {
                     try {
                         int[] coordinates = TranslateCoordinate.translate(input);
                         if (coordinates != null) {
-                            network.sendSpaceInformation(coordinates);
-                            iPassed = false;
-                            currentTurn = currentTurn.opponent();
+                            if (coordinates[0] >= 0 && coordinates[0] < 19 && coordinates[1] >= 0 && coordinates[1] < 19) {
+                                network.sendSpaceInformation(coordinates);
+                                board.setField(coordinates[0], coordinates[1], myColor);
+                                gameView.showBoard(board);
+                                gameView.showMessage("Ruch wysłany. Czekanie na odpowiedź bota...");
+                                iPassed = false;
+                                currentTurn = currentTurn.opponent();
+                            } else {
+                                gameView.showMessage("Ruch poza planszą!");
+                            }
                         } else {
                             gameView.showMessage("Nieprawidłowy format ruchu");
                         }

@@ -15,12 +15,12 @@ public class SmartBotHeuristics {
     private final Board sandboxBoard = new Board(19);
 
     //stale wag uzywane do wyliczenia wartosci numerycznej danego pola
-    private final static int locationScoreWeight = 5;
-    private final static int captureScoreWeight = 30;
-    private final static int groutSafeScoreWeight = 20;
-    private final static int shapeScoreWeight = 10;
-    private final static int cutOpponentScoreWeight = 10;
-    private final static int connectOwnGroupScoreWeight = 15;
+    private final static int locationScoreWeight = 25;
+    private final static int captureScoreWeight = 40;
+    private final static int groutSafeScoreWeight = 15;
+    private final static int shapeScoreWeight = 20;
+    private final static int cutOpponentScoreWeight = 20;
+    private final static int connectOwnGroupScoreWeight = 5;
 
     //stala okreslajaca maksymalna liczbe kandydatow, ktorzy beda potem poddani symulacji
     private final static int bestCandidatesNumber = 10;
@@ -38,12 +38,6 @@ public class SmartBotHeuristics {
     //stala okreslajaca liczbe punktow w zaleznosci od liczby polaczonych osobnych grup
     private final static double[] groupConnectionPoints = {0, 10, 20, 30, 50};
 
-    private final Set<Point> groupMembersSandbox = new HashSet<>();
-    private final Set<Point> groupLibertiesSandbox = new HashSet<>();
-    private final Set<Point> exploredFieldsSandbox = new HashSet<>();
-    private final ArrayList<CandidateRecord> bestCandidates = new ArrayList<>(19*19);
-    private final ArrayList<CandidateRecord> verifiedCandidates = new ArrayList<>(bestCandidatesNumber);
-
 
     public SmartBotHeuristics(GameMechanics mechanics) {
         this.mechanics = mechanics;
@@ -53,6 +47,8 @@ public class SmartBotHeuristics {
     //ktorych ruch jest legalny
     public ArrayList<CandidateRecord> findBestCandidates(Board board, Stone color) {
         Point[] candidates = new Point[10];
+        ArrayList<CandidateRecord> bestCandidates = new ArrayList<>(19*19);
+        ArrayList<CandidateRecord> verifiedCandidates = new ArrayList<>(bestCandidatesNumber);
 
         for (int x = 0; x < board.getSize(); x++) {
             for (int y = 0; y < board.getSize(); y++) {
@@ -114,7 +110,7 @@ public class SmartBotHeuristics {
             score = mechanics.whiteCaptures;
             mechanics.CheckCaptures(sandboxBoard, point.x, point.y, color);
             score = mechanics.whiteCaptures - score;
-            mechanics.subtractFromBlackCaptures(score);
+            mechanics.subtractFromWhiteCaptures(score);
         }
         return score;
     }
@@ -125,8 +121,8 @@ public class SmartBotHeuristics {
 
         sandboxBoard.setField(point.x, point.y, color);
 
-        groupLibertiesSandbox.clear();
-        groupMembersSandbox.clear();
+        Set<Point> groupLibertiesSandbox = new HashSet<>();
+        Set<Point> groupMembersSandbox = new HashSet<>();
 
         mechanics.exploreGroup(sandboxBoard, point, color, groupMembersSandbox, groupLibertiesSandbox);
 
@@ -210,9 +206,9 @@ public class SmartBotHeuristics {
     private double calculateConnectOwnGroupScore(Board board, Point point, Stone color) {
         int score = 0;
         int differentGroups = 0;
-        groupLibertiesSandbox.clear();
-        exploredFieldsSandbox.clear();
-        groupMembersSandbox.clear();
+        Set<Point> groupLibertiesSandbox = new HashSet<>();
+        Set<Point> exploredFieldsSandbox = new HashSet<>();
+        Set<Point> groupMembersSandbox = new HashSet<>();
 
         for (Direction d : Direction.values()) {
             int newX = point.x + d.getDx();
