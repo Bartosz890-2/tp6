@@ -3,18 +3,33 @@ package go.server;
 import java.io.DataInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+
+import go.database.GameRepository;
 import go.logic.Protocol;
+@SpringBootApplication
+@ComponentScan(basePackages="go")
+@EntityScan(basePackages="go.database")
+@EnableJpaRepositories(basePackages="go.database")
+public class GoServer implements CommandLineRunner {
 
-public class GoServer {
-
+    @Autowired
+    private GameRepository gameRepository;
     // Poczekalnia dla gracza, który chce grać PvP
     private Socket waitingPlayer = null;
 
     public static void main(String[] args) {
-        new GoServer();
+        SpringApplication.run(GoServer.class, args);
     }
-
-    public GoServer() {
+    @Override
+    public void run(String... args) throws Exception {
         System.out.println("Serwer Go START na porcie " + Protocol.Port);
 
         try (ServerSocket serverSocket = new ServerSocket(Protocol.Port)) {
@@ -30,7 +45,7 @@ public class GoServer {
 
                     if (gameType == 1) {
                         System.out.println(" -> Klient wybrał grę z BOTEM.");
-                        BotGameSession botSession = new BotGameSession(clientSocket);
+                        BotGameSession botSession = new BotGameSession(clientSocket, gameRepository);
                         new Thread(botSession).start();
                     }
                     else if (gameType == 2) {
@@ -56,7 +71,7 @@ public class GoServer {
             System.out.println("    Gracz w poczekalni.");
         } else {
             System.out.println("    Mamy parę! Start PvP.");
-            GameSession gameSession = new GameSession(waitingPlayer, clientSocket);
+            GameSession gameSession = new GameSession(waitingPlayer, clientSocket, gameRepository);
             new Thread(gameSession).start();
             waitingPlayer = null;
         }

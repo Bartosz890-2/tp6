@@ -5,6 +5,8 @@ import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import go.database.GameRepository;
+import go.database.GameResult;
 import go.logic.Board;
 import go.logic.GameMechanics;
 import go.logic.Protocol;
@@ -25,6 +27,8 @@ public class GameSession implements Runnable{
     private final Board board;
     private final GameMechanics mechanics;
 
+    private final GameRepository gameRepository;
+    private final StringBuilder historyLog=new StringBuilder();
     /**
      * Lista punktów oznaczonych jako martwe w fazie negocjacji.
      * Służy jako bufor przechowujący propozycję jednego gracza przed wysłaniem jej do drugiego
@@ -39,11 +43,12 @@ public class GameSession implements Runnable{
      * @param p1 gniazdo sieciowe pierwszego gracza (który zagra Czarnymi).
      * @param p2 gniazdo sieciowe drugiego gracza (który zagra Białymi).
      */
-    public GameSession(Socket p1, Socket p2){
+    public GameSession(Socket p1, Socket p2, GameRepository gameRepository){
         this.p1Socket = p1;
         this.p2Socket = p2;
         this.board = new Board(19);
         this.mechanics = new GameMechanics();
+        this.gameRepository = gameRepository;
     }
 
     /**
@@ -104,7 +109,9 @@ public class GameSession implements Runnable{
 
                         //wykonanie ruchu na planszy
                         System.out.println("Gracz " + (currentPlayer + 1) + " wykonał ruch na pozycję (" + x + "," + y + ")");
-
+                        String moveStr = (char)('A' + x) + "" + (y + 1);
+                        String colorStr = (currentPlayer == 0) ? "B" : "W"; // 0 to Black, 1 to White
+                        historyLog.append(colorStr).append("[").append(moveStr).append("];");
                         //Przekazanie stanu planszy i liczby jeńców obu graczom
                         outputs[currentPlayer].writeInt(Protocol.BOARD_STATE);
                         Protocol.sendBoard(board, outputs[currentPlayer]);
@@ -144,7 +151,8 @@ public class GameSession implements Runnable{
                     outputs[opponent].writeInt(Protocol.PASS);
                     outputs[opponent].flush();
                     consecutivePasses++;
-
+                    String colorStr = (currentPlayer == 0) ? "B" : "W"; // 0 to Black, 1 to White
+                    historyLog.append(colorStr).append("[PASS];");
                     if(consecutivePasses >=2){
                         System.out.println("Faza negocjacji.");
                         // 1. Informujemy obu graczy, że zaczynamy oznaczanie
@@ -196,7 +204,11 @@ public class GameSession implements Runnable{
                     mechanics.calculateGameScore(board);
                     int blackScore = mechanics.getBlackTerritory() + mechanics.blackCaptures;
                     int whiteScore = mechanics.getWhiteTerritory() + mechanics.whiteCaptures;
-
+                    String winner = (blackScore > whiteScore) ? "Black" : "White";
+                    if (blackScore == whiteScore) winner = "Draw";
+                    
+                    GameResult result = new GameResult(winner, blackScore, whiteScore, "PvP", historyLog.toString());
+                    gameRepository.save(result);
                     System.out.println("Wynik gry - Czarny: " + blackScore + ", Biały: " + whiteScore);
 
                     // Wysłanie wyników do gracza akceptującego

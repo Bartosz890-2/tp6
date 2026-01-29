@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import go.database.GameRepository;
+import go.database.GameResult;
 import go.logic.Board;
 import go.logic.GameMechanics;
 import go.logic.Protocol;
@@ -19,18 +21,21 @@ public class BotGameSession implements Runnable {
     private final GameMechanics mechanics;
     private final SmartBot smartBot; // Nasz mózg
 
+    private final GameRepository gameRepository;
+    private final StringBuilder historyLog = new StringBuilder();
     // Gracz to zawsze Czarny (Player 1), Bot to Biały (Player 2)
     private final Stone humanColor = Stone.BLACK;
     private final Stone botColor = Stone.WHITE;
 
     private final ArrayList<Point> currentProposalPoints = new ArrayList<>();
 
-    public BotGameSession(Socket humanSocket) {
+    public BotGameSession(Socket humanSocket, GameRepository gameRepository) {
         this.humanSocket = humanSocket;
         this.board = new Board(19);
         this.mechanics = new GameMechanics();
         // Inicjalizujemy bota
         this.smartBot = new SmartBot(mechanics);
+        this.gameRepository = gameRepository;
     }
 
     @Override
@@ -66,6 +71,8 @@ public class BotGameSession implements Runnable {
                         if (mechanics.IsMovePossible(board, x, y, humanColor)) {
                             consecutivePasses = 0;      // Resetujemy licznik pasów
                             currentPlayerIndex = 1;     // Przekazujemy turę BOTOWI
+                            String moveStr = (char)('A' + x) + "" + (y + 1);
+                            historyLog.append("B[").append(moveStr).append("];");
                             System.out.println("Gracz wykonał ruch: " + x + ", " + y);
                         } else {
                             System.out.println("Nielegalny ruch gracza: " + x + ", " + y);
@@ -77,6 +84,7 @@ public class BotGameSession implements Runnable {
                         }
                     }
                     else if (messageType == Protocol.PASS) {
+                        historyLog.append("B[PASS];");
                         System.out.println("Gracz pasuje.");
                         consecutivePasses++;
 
@@ -108,6 +116,8 @@ public class BotGameSession implements Runnable {
                         // Nie musimy sprawdzać IsMovePossible, bo bot wybiera tylko legalne,
                         // ale dla bezpieczeństwa w silniku można:
                         mechanics.IsMovePossible(board, botMove.x, botMove.y, botColor);
+                        String moveStr = (char)('A' + botMove.x) + "" + (botMove.y + 1);
+                        historyLog.append("W[").append(moveStr).append("];");
                         consecutivePasses = 0;
                         System.out.println("Bot zagrał: " + botMove.x + ", " + botMove.y);
 
@@ -125,6 +135,7 @@ public class BotGameSession implements Runnable {
                     } else {
                         // --- BOT PASUJE ---
                         System.out.println("Bot pasuje.");
+                        historyLog.append("W[PASS];");
                         consecutivePasses++;
 
                         // Informujemy człowieka o pasie bota
@@ -184,7 +195,11 @@ public class BotGameSession implements Runnable {
 
                 int blackScore = mechanics.getBlackTerritory() + mechanics.blackCaptures;
                 int whiteScore = mechanics.getWhiteTerritory() + mechanics.whiteCaptures;
-
+                String winner = (blackScore > whiteScore) ? "Black" : "White";
+                GameResult result = new GameResult(winner, blackScore, whiteScore, "Bot", historyLog.toString());
+                gameRepository.save(result);
+                if (blackScore == whiteScore) winner = "Draw";
+                
                 // Wysyłamy wynik
                 output.writeInt(Protocol.GAME_OVER);
                 output.writeInt(blackScore);
