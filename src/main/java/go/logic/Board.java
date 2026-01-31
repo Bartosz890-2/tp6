@@ -1,8 +1,6 @@
 package go.logic;
 
-import java.awt.*;
-import java.util.Arrays;
-import java.util.Objects;
+import java.awt.Point;
 
 /**
  * Klasa reprezentująca planszę do gry w Go.

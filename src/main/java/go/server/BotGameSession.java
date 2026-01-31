@@ -100,8 +100,30 @@ public class BotGameSession implements Runnable {
                         }
                     }
                     else if (messageType == Protocol.QUIT) {
+                        System.out.println("Gracz opuścił grę.");
+                        String winner = "White"; // Bot wygrywa
+                        mechanics.calculateGameScore(board); // Policz to co jest na planszy
+                        int bScore = mechanics.getBlackTerritory() + mechanics.blackCaptures;
+                        int wScore = mechanics.getWhiteTerritory() + mechanics.whiteCaptures;
+                        historyLog.append("B[QUIT];");    
+                        GameResult result = new GameResult(winner, bScore, wScore, "Bot", historyLog.toString());
+                        gameRepository.save(result);
+                        System.out.println("Zapisano wynik (Quit) do bazy!");
                         break; // Wyjście
                     }
+                 else if (messageType == Protocol.SURRENDER) {
+                    System.out.println("Gracz się poddał.");
+                    String winner = "White";
+                    historyLog.append("B[SURRENDER];");
+                    mechanics.calculateGameScore(board);
+                    int bScore = mechanics.getBlackTerritory() + mechanics.blackCaptures;
+                    int wScore = mechanics.getWhiteTerritory() + mechanics.whiteCaptures;
+                    GameResult result = new GameResult(winner, bScore, wScore, "Bot", historyLog.toString());
+                    gameRepository.save(result);
+                    System.out.println("Zapisano wynik (Surrender) do bazy!");
+                    
+                    break;
+                }
                 }
                 // ============================================================
                 // TURA BOTA (OBLICZENIA LOKALNE)

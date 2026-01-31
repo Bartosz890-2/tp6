@@ -228,12 +228,28 @@ public class GameSession implements Runnable{
                 } else if (messageType == Protocol.SURRENDER) {
                     //gdy gracz sie podda przekazujemy informację przeciwnikowi i kończymy grę
                     System.out.println("Gracz " + (currentPlayer + 1) + " się poddał. Gracz " + (opponent + 1) + " wygrywa.");
+                    String winner = (currentPlayer == 0) ? "White" : "Black"; // Wygrał przeciwnik
+                    String colorStr = (currentPlayer == 0) ? "B" : "W";
+                    historyLog.append(colorStr).append("[SURRENDER];");
+                    mechanics.calculateGameScore(board); // Policz to co jest na planszy
+                    int bScore = mechanics.getBlackTerritory() + mechanics.blackCaptures;
+                    int wScore = mechanics.getWhiteTerritory() + mechanics.whiteCaptures;
+                    GameResult result = new GameResult(winner, bScore, wScore, "PvP", historyLog.toString());
+                    gameRepository.save(result);
                     outputs[opponent].writeInt(Protocol.SURRENDER);
                     outputs[opponent].flush();
                     break;
                 } else if (messageType == Protocol.QUIT) {
                     //gdy gracz wychodzi z gry przekazujemy informację przeciwnikowi i kończymy grę
                     System.out.println("Gracz " + (currentPlayer + 1) + " wyszedł z gry.");
+                    String winner = (currentPlayer == 0) ? "White" : "Black"; // Wygrał przeciwnik
+                    String colorStr = (currentPlayer == 0) ? "B" : "W";
+                    historyLog.append(colorStr).append("[QUIT];");
+                    mechanics.calculateGameScore(board); // Policz to co jest na planszy
+                    int bScore = mechanics.getBlackTerritory() + mechanics.blackCaptures;
+                    int wScore = mechanics.getWhiteTerritory() + mechanics.whiteCaptures;
+                    GameResult result = new GameResult(winner, bScore, wScore, "PvP", historyLog.toString());
+                    gameRepository.save(result);
                     outputs[opponent].writeInt(Protocol.QUIT);
                     outputs[opponent].flush();
                     break;

@@ -19,6 +19,7 @@ public class Protocol {
     /** Identyfikator drugiego gracza (zazwyczaj Białego). */
     public static final int Player2=2;
 
+    public static final int HISTORY_MODE=3;
     // --- Typy Komunikatów (Nagłówki) ---
 
     /** Sygnał wykonania ruchu (postawienia kamienia). */
