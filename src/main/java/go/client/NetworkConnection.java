@@ -230,4 +230,33 @@ public class NetworkConnection {
     public String receiveMessage() throws IOException {
         return fromServer.readUTF();
     }
+    public ArrayList<GameRecordDTO> fetchGameList() throws IOException {
+        ArrayList<GameRecordDTO> games = new ArrayList<>();
+        Socket historySocket = new Socket("localhost", Protocol.Port);
+        DataOutputStream out = new DataOutputStream(historySocket.getOutputStream());
+        DataInputStream in = new DataInputStream(historySocket.getInputStream());
+        try {
+            out.writeInt(Protocol.HISTORY_MODE);
+            out.flush();
+            int count = in.readInt();
+            System.out.println("Pobieranie historii: znaleziono " + count + " gier.");
+
+            for (int i = 0; i < count; i++) {
+                long id = in.readLong();
+                String date = in.readUTF();
+                String winner = in.readUTF();
+                int bScore = in.readInt();
+                int wScore = in.readInt();
+                String type = in.readUTF();
+                String history = in.readUTF(); 
+
+                String scoreStr = "B:" + bScore + " | W:" + wScore;
+                games.add(new GameRecordDTO(id, date, winner, scoreStr, type, history));
+            }
+        } finally {
+            historySocket.close(); 
+        }
+        
+        return games;
+    }
 }

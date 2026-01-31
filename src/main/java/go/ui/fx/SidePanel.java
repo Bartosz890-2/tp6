@@ -32,6 +32,9 @@ public class SidePanel extends VBox {
 
     private final Button doneBtn = new Button("Done");
     private final Button acceptBtn = new Button("Accept");
+    private final Button prevBtn = new Button("< Cofnij");
+    private final Button nextBtn = new Button("Dalej >");
+    private final Button exitReplayBtn = new Button("Zamknij");
 
     /**
      * Konstruktor panelu bocznego.
@@ -52,6 +55,9 @@ public class SidePanel extends VBox {
         acceptBtn.getStyleClass().add("game-button");
         doneBtn.getStyleClass().add("game-button");
 
+        prevBtn.getStyleClass().add("game-button");
+        nextBtn.getStyleClass().add("game-button");
+        exitReplayBtn.getStyleClass().add("game-button");
         // Przyciski negocjacji są domyślnie ukryte i nie zajmują miejsca w layout
         acceptBtn.setManaged(false);
         acceptBtn.setVisible(false);
@@ -63,6 +69,10 @@ public class SidePanel extends VBox {
         buttonsBox.setAlignment(Pos.CENTER);
         buttonsBox.getChildren().addAll(passBtn, surrenderBtn, quitBtn, doneBtn, acceptBtn);
 
+        HBox replayButtonsBox = new HBox(10);
+        replayButtonsBox.setAlignment(Pos.CENTER);
+        replayButtonsBox.getChildren().addAll(prevBtn, nextBtn, exitReplayBtn);
+        toggleReplayMode(false);
         logArea.setEditable(false);
         logArea.setPrefHeight(250);
         logArea.setWrapText(true);
@@ -86,10 +96,33 @@ public class SidePanel extends VBox {
         chatInputBox.getChildren().addAll(chatInput, sendBtn);
         this.setSpacing(10);
 
-        this.getChildren().addAll(label, logArea, buttonsBox, chatLabel, chatArea, chatInputBox);
+        this.getChildren().addAll(label, logArea, buttonsBox, replayButtonsBox, chatLabel, chatArea, chatInputBox);
         this.setPrefWidth(350);
     }
 
+    public void toggleReplayMode(boolean active){
+        passBtn.setVisible(!active);
+        passBtn.setManaged(!active);
+        surrenderBtn.setVisible(!active);
+        surrenderBtn.setManaged(!active);
+        quitBtn.setVisible(!active);
+        quitBtn.setManaged(!active);
+
+        doneBtn.setVisible(false);
+        doneBtn.setManaged(false);
+        acceptBtn.setVisible(false);
+        acceptBtn.setManaged(false);
+        
+        prevBtn.setVisible(active);
+        prevBtn.setManaged(active);
+        nextBtn.setVisible(active);
+        nextBtn.setManaged(active);
+        exitReplayBtn.setVisible(active);
+        exitReplayBtn.setManaged(active);
+    }
+    public Button getPrevBtn() { return prevBtn; }
+    public Button getNextBtn() { return nextBtn; }
+    public Button getExitReplayBtn() { return exitReplayBtn; }
     /**
      * Dodaje nową wiadomość do obszaru logów (historii gry).
      * Automatycznie przewija widok do najnowszej wiadomości.

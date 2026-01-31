@@ -47,30 +47,26 @@ public class GoClient {
      * PYTA UŻYTKOWNIKA O TRYB GRY (Bot vs Human),
      * wysyła wybór do serwera, ustala tożsamość i startuje grę.
      */
-    public void connect(){
+public void connect(){
         try {
-            // 1. Zapytaj użytkownika o tryb gry PRZED połączeniem
-            // (Musisz dodać tę metodę do interfejsu GameView!)
-            // Zwraca: 1 = Bot, 2 = Multiplayer
             int selectedMode = gameView.askForGameMode();
-
+            if (selectedMode == -1) {
+                gameView.showMessage("Uruchomiono tryb historii.");
+                return;
+            }
+            if (selectedMode == 0) {
+                System.exit(0);
+            }
             gameView.showMessage("Łączenie z serwerem...");
-            network.connect(); // Fizyczne połączenie socketu
+            network.connect(); 
 
-            // 2. Wyślij wybór do serwera (Handshake)
-            // (Musisz dodać tę metodę do NetworkConnection!)
             network.sendGameMode(selectedMode);
 
-            // 3. Dalej po staremu - odbieramy ID przydzielone przez serwer
             int playerId = network.getPlayerId();
             gameView.showMessage("Połączono jako gracz " + playerId);
 
             if(playerId == Protocol.Player1){
-                // Jeśli gramy z Botem, to "wait" trwa ułamek sekundy, bo bot jest gotowy od razu
                 gameView.showMessage("Czekanie na przeciwnika...");
-
-                // W trybie BOTnetwork.waitForSecondPlayer() może od razu zwrócić true,
-                // w trybie HUMAN czeka na drugiego człowieka.
                 network.waitForSecondPlayer();
 
                 myColor = Stone.BLACK;

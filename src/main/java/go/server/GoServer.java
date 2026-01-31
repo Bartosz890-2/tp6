@@ -14,6 +14,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import go.database.GameRepository;
 import go.logic.Protocol;
+import go.database.GameResult;
+import java.util.List;
+import java.io.DataOutputStream;
+import java.io.IOException;
 @SpringBootApplication
 @ComponentScan(basePackages="go")
 @EntityScan(basePackages="go.database")
@@ -52,6 +56,10 @@ public class GoServer implements CommandLineRunner {
                         System.out.println(" -> Klient wybrał grę MULTIPLAYER.");
                         handleMultiplayerQueue(clientSocket);
                     }
+                    else if(gameType==Protocol.HISTORY_MODE){
+                        System.out.println(" -> Klient pobiera historię gier.");
+                        handleHistoryRequest(clientSocket);
+                    }
                     else {
                         System.out.println("Nieznany tryb: " + gameType);
                         clientSocket.close();
@@ -74,6 +82,30 @@ public class GoServer implements CommandLineRunner {
             GameSession gameSession = new GameSession(waitingPlayer, clientSocket, gameRepository);
             new Thread(gameSession).start();
             waitingPlayer = null;
+        }
+    }
+    private void handleHistoryRequest(Socket clientSocket) {
+        try (
+            DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
+            clientSocket
+        ) {
+            List<GameResult> allGames = gameRepository.findAll();
+            out.writeInt(allGames.size());
+            for (GameResult game : allGames) {
+                out.writeLong(game.getId());
+                out.writeUTF(game.getPlayedAt().toString()); 
+                out.writeUTF(game.getWinner() != null ? game.getWinner() : "?");
+                out.writeInt(game.getBlackScore());
+                out.writeInt(game.getWhiteScore());
+                out.writeUTF(game.getGameType() != null ? game.getGameType() : "Unknown");
+                String history = game.getMovesHistory();
+                out.writeUTF(history != null ? history : "");
+            }
+            out.flush();
+            System.out.println("    Wysłano " + allGames.size() + " rekordów.");
+            
+        } catch (IOException e) {
+            System.out.println("Błąd podczas wysyłania historii: " + e.getMessage());
         }
     }
 }
