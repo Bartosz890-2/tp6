@@ -1,15 +1,21 @@
 package go.database;
 
-import java.time.LocalDate;
-
-import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
 @Entity
 @Table(name = "game_results")
+// Klasa reprezentujaca wynik gry w bazie danych
 public class GameResult {
+    // Identyfikator wyniku gry, generowany automatycznie przez bazę danych
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // kolumny tabeli w bazie danych
     private Long id;
     private LocalDateTime playedAt;
     private String winner;
@@ -20,6 +26,7 @@ public class GameResult {
     private String movesHistory;
     public GameResult() {
     }
+    // Konstruktor pozwalajacy na stworzenie obiektu GameResult z podanymi parametrami
     public GameResult(String winner, int BlackScore, int WhiteScore, String gameType, String movesHistory) {
         this.playedAt = LocalDateTime.now();
         this.winner = winner;
@@ -28,6 +35,7 @@ public class GameResult {
         this.gameType = gameType;
         this.movesHistory = movesHistory;
     }
+    // Gettery pozwalaja na dostep do pol klasy
     public Long getId() {return id;}
     public LocalDateTime getPlayedAt() {return playedAt;}
     public String getWinner() {return winner;}

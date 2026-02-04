@@ -1,8 +1,11 @@
 package go.server;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -13,11 +16,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import go.database.GameRepository;
-import go.logic.Protocol;
 import go.database.GameResult;
-import java.util.List;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import go.logic.Protocol;
 @SpringBootApplication
 @ComponentScan(basePackages="go")
 @EntityScan(basePackages="go.database")
@@ -43,7 +43,7 @@ public class GoServer implements CommandLineRunner {
                     Socket clientSocket = serverSocket.accept();
                     System.out.println("Nowe połączenie: " + clientSocket.getInetAddress());
 
-                    // 2. CZYTAMY TRYB GRY (To jest kluczowe!)
+                    // 2 Czytamy wybrany tryb gry od klienta
                     DataInputStream input = new DataInputStream(clientSocket.getInputStream());
                     int gameType = input.readInt(); // Tu serwer dowiaduje się: 1=BOT, 2=PvP
 
