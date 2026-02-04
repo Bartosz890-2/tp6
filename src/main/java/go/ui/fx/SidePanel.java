@@ -22,6 +22,7 @@ import javafx.scene.layout.VBox;
  */
 public class SidePanel extends VBox {
     private final TextArea logArea=new TextArea();
+    // Przyciski do sterowania rozgrywką
     private final Button passBtn=new Button("Pass");
     private final Button surrenderBtn=new Button("Surrender");
     private final Button quitBtn = new Button("Quit");
@@ -29,9 +30,10 @@ public class SidePanel extends VBox {
     private final TextArea chatArea = new TextArea();
     private final TextField chatInput = new TextField();
     private final Button sendBtn = new Button("Send");
-
+    // Przyciski fazy negocjacji, które są domyślnie ukryte
     private final Button doneBtn = new Button("Done");
     private final Button acceptBtn = new Button("Accept");
+    // Przyciski do nawigacji w trybie odtwarzania partii
     private final Button prevBtn = new Button("< Cofnij");
     private final Button nextBtn = new Button("Dalej >");
     private final Button exitReplayBtn = new Button("Zamknij");
@@ -99,7 +101,7 @@ public class SidePanel extends VBox {
         this.getChildren().addAll(label, logArea, buttonsBox, replayButtonsBox, chatLabel, chatArea, chatInputBox);
         this.setPrefWidth(350);
     }
-
+    // Metoda toggleReplayMode przełącza widoczność przycisków w zależności od tego, czy jesteśmy w trybie odtwarzania partii, czy nie
     public void toggleReplayMode(boolean active){
         passBtn.setVisible(!active);
         passBtn.setManaged(!active);
@@ -120,6 +122,7 @@ public class SidePanel extends VBox {
         exitReplayBtn.setVisible(active);
         exitReplayBtn.setManaged(active);
     }
+    // Gettery do przycisków i elementów interaktywnych, które pozwalają kontrolerowi przypisać im akcje
     public Button getPrevBtn() { return prevBtn; }
     public Button getNextBtn() { return nextBtn; }
     public Button getExitReplayBtn() { return exitReplayBtn; }

@@ -17,9 +17,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
+// Okno pokazujace liste zapisanych gier, pozwalajace na odtworzenie wybranej partii
 public class GameListWindow {
-
+    // Metoda show tworzy nowe okno z tabela, w ktorej wyswietlane sa zapisane gry
     public void show() {
         Stage stage = new Stage();
         stage.setTitle("Historia Gier - Wybierz partię");
